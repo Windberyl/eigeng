@@ -171,6 +171,10 @@ static int balance /* balance a matrix .........................*/
     m = 0;
     k = n - 1;
 
+
+    // finds zero rows and swaps them with the last non zero row
+    // stores row swaps in scal to be able to reverse balancing in a later function
+    // O(n^3) time complexity; O(n^2) space compexlity; O(1) additional space
     do
     {
         iter = FALSE;
@@ -197,6 +201,9 @@ static int balance /* balance a matrix .........................*/
     }     /* end of do  */
     while (iter);
 
+    // almost same as previous do while loop
+    // finds zero rows, moves to last non zero column
+    // O(n^3) time complexity; O(n^2) space compexlity; O(1) additional space
     do
     {
         iter = FALSE;
@@ -222,6 +229,7 @@ static int balance /* balance a matrix .........................*/
     }     /* end of do  */
     while (iter);
 
+    // return indicies of zero rows through low and high pointers
     *low = m;
     *high = k;
     for (i = m; i <= k; i++)
@@ -782,7 +790,7 @@ static int hqrvec  /* compute eigenvectors ......................*/
             else
             {
                 /* comdiv(-h[na][en], ZERO, h[na][na]-p, q, &h[na][na], &h[na][en]); */
-                REAL complex c;
+                double complex c;
                 c = -h[na][en] / (h[na][na] - p + q * I);
                 h[na][na] = creal(c);
                 h[na][en] = cimag(c);
