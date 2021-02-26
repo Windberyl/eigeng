@@ -183,12 +183,14 @@ static int balance /* balance a matrix .........................*/
             for (r = ZERO, i = 0; i <= k; i++)
                 if (i != j)
                     r += ABS(mat[j][i]);
-
+            
+            // check if row is zero
             if (r == ZERO)
             {
                 scal[k] = (REAL)j;
                 if (j != k)
                 {
+                    // swap row with last non-zero row
                     for (i = 0; i <= k; i++)
                         SWAP(REAL, mat[i][j], mat[i][k])
                     for (i = m; i < n; i++)
@@ -317,6 +319,8 @@ static int balback /* reverse balancing ........................*/
     register int i, j, k;
     REAL s;
 
+    // reverse matrix balancing using scal matrix
+    // O(n^2) time complexity; O(n^2) space complexity; O(1) additional space
     for (i = low; i <= high; i++)
     {
         s = scal[i];
@@ -383,10 +387,14 @@ static int elmhes /* reduce matrix to upper Hessenberg form ....*/
     register int i, j, m;
     REAL x, y;
 
+    // Transforms mat to upper hessenberg matrix
+    // Normalize non zero rows
+    // O(n^3) time complexity; O(n^2) space complexity; O(1) additional space
     for (m = low + 1; m < high; m++)
     {
         i = m;
         x = ZERO;
+        // find highest absolute value and index in column m-1
         for (j = m; j <= high; j++)
             if (ABS(mat[j][m - 1]) > ABS(x))
             {
@@ -395,6 +403,9 @@ static int elmhes /* reduce matrix to upper Hessenberg form ....*/
             }
 
         perm[m] = i;
+
+        // swap the ith row with the mth row
+        // and swap the ith column with the mth column
         if (i != m)
         {
             for (j = m - 1; j < n; j++)
@@ -403,6 +414,10 @@ static int elmhes /* reduce matrix to upper Hessenberg form ....*/
                 SWAP(REAL, mat[j][i], mat[j][m])
         }
 
+        // normalizes non zero rows
+        // main diagonal is set to 1
+        // rows [m+1, high] minus row m
+        // column m minus columns[m+1, high]
         if (x != ZERO)
         {
             for (i = m + 1; i <= high; i++)
@@ -410,7 +425,11 @@ static int elmhes /* reduce matrix to upper Hessenberg form ....*/
                 y = mat[i][m - 1];
                 if (y != ZERO)
                 {
+                    // set y to 1 if mat[i][m - 1] > 0
+                    // set y to -1 if mat[i][m- 1] < 0
                     y = mat[i][m - 1] = y / x;
+                    // subtract row i and row m if y = 1
+                    // subtract column m from column i if y = -1
                     for (j = m; j < n; j++)
                         mat[i][j] -= y * mat[m][j];
                     for (j = 0; j <= high; j++)
@@ -458,6 +477,8 @@ static int elmtrans /* copy to Hessenberg form .................*/
 {
     register int k, i, j;
 
+    // Turn h into the indentity matrix
+    // O(n^2) time complexity
     for (i = 0; i < n; i++)
     {
         for (k = 0; k < n; k++)
@@ -465,11 +486,18 @@ static int elmtrans /* copy to Hessenberg form .................*/
         h[i][i] = ONE;
     }
 
+    // copy non-zero rows from mat to h
+    // O(n^2) time complexity
     for (i = high - 1; i > low; i--)
     {
         j = perm[i];
         for (k = i + 1; k <= high; k++)
             h[k][i] = mat[k][i - 1];
+        
+        // if row i has been moved
+        // set cells above the main diagonal to zero
+        // set main diagonal to one.
+        // set cells below main diagonal to cells mapped to by perm[i]
         if (i != j)
         {
             for (k = i; k <= high; k++)
@@ -790,7 +818,7 @@ static int hqrvec  /* compute eigenvectors ......................*/
             else
             {
                 /* comdiv(-h[na][en], ZERO, h[na][na]-p, q, &h[na][na], &h[na][en]); */
-                double complex c;
+                REAL complex c;
                 c = -h[na][en] / (h[na][na] - p + q * I);
                 h[na][na] = creal(c);
                 h[na][en] = cimag(c);
