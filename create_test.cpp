@@ -2,6 +2,7 @@
 #include <fstream>
 #include <random>
 #include <memory>
+#include <functional>
 
 int main(int argc, char **argv){
     if(argc < 2){
